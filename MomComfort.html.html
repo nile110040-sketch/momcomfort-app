@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MomComfort</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --primary: #2a9d8f; /* Teal */
+    --primary-light: #e8f5f3;
+    --secondary: #f4a261; /* Peach/Coral */
+    --bg-color: #fcfcfc;
+    --surface: #ffffff;
+    --text-dark: #264653;
+    --text-muted: #6c757d;
+    --danger: #ff5252;
+    --danger-light: #ffebee;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; font-family:'Sarabun', sans-serif; background: var(--bg-color); color: var(--text-dark); scroll-behavior: smooth; }
+  h1, h2, h3, h4, .font-prompt { font-family:'Prompt', sans-serif; }
+  .hidden { display: none !important; }
+
+  /* ---------------- Auth Screen ---------------- */
+  #auth-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background: radial-gradient(circle at top left, var(--primary-light), transparent); padding:20px; }
+  .auth-box { background: var(--surface); border-radius: 30px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(42, 157, 143, 0.08); border: 1px solid rgba(42, 157, 143, 0.1); }
+  .auth-logo { background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px; transform: rotate(-10deg); }
+  .auth-title { text-align:center; font-size:28px; font-weight:700; color: var(--text-dark); margin-bottom: 5px; }
+  .auth-subtitle { text-align:center; font-size:14px; color:var(--text-muted); margin-bottom:30px; }
+  .auth-error { background:var(--danger-light); color:#c62828; border-radius:12px; padding:12px; font-size:13px; margin-bottom:20px; display:none; text-align: center; }
+  .auth-error.show { display:block; }
+
+  /* ---------------- App Wrapper & Header ---------------- */
+  #app-wrapper { min-height:100%; padding-bottom:80px; }
+  .top-nav { background: var(--surface); padding: 15px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon { background: var(--primary); color: white; padding: 8px; border-radius: 12px; }
+  .brand-name { font-size: 20px; font-weight: 700; font-family: 'Prompt'; color: var(--primary); }
+  
+  .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .user-badge { display: flex; align-items: center; gap: 12px; background: var(--primary-light); padding: 6px 16px; border-radius: 50px; }
+  .user-info { display: flex; flex-direction: column; align-items: flex-end; }
+  .user-name { font-size: 14px; font-weight: 600; color: var(--primary); }
+  
+  /* ---------------- Buttons & Inputs ---------------- */
+  .btn { padding: 12px 24px; border-radius: 50px; font-family: 'Prompt'; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(42, 157, 143, 0.2); }
+  .btn-primary:hover { transform: translateY(-2px); background: #21867a; }
+  .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(255, 82, 82, 0.2); }
+  .btn-danger:hover { transform: translateY(-2px); background: #e53935; }
+  .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 14px; border-radius: 50px; font-size: 13px; font-weight: 600; }
+  .btn-outline:hover { background: var(--primary-light); }
+  .btn-icon { padding: 8px 12px; border-radius: 50px; background: #fff1f0; color: #ff4d4f; border: none; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: var(--text-dark); }
+  .form-control { width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 16px; font-size: 14px; font-family: inherit; transition: border 0.2s; background: #fafafa; }
+  .form-control:focus { outline: none; border-color: var(--primary); background: white; }
+  textarea.form-control { resize: vertical; min-height: 80px; }
+
+  /* ---------------- Navigation Pills ---------------- */
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px 20px; }
+  .nav-pills-wrap { margin-bottom: 25px; }
+  .nav-pills { 
+    display: flex; flex-wrap: nowrap; gap: 10px; overflow-x: auto; overflow-y: hidden;
+    padding-bottom: 12px; width: 100%; -webkit-overflow-scrolling: touch; scroll-behavior: smooth;
+    scrollbar-width: thin; scrollbar-color: var(--primary) var(--primary-light);
+  }
+  .nav-pills::-webkit-scrollbar { height: 6px; }
+  .nav-pills::-webkit-scrollbar-track { background: var(--primary-light); border-radius: 10px; }
+  .nav-pills::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+  .nav-pills::-webkit-scrollbar-thumb:hover { background: #21867a; }
+  
+  .pill { 
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    white-space: nowrap; padding: 10px 20px; border-radius: 50px; background: white; 
+    border: 1px solid #edf2f7; color: var(--text-muted); cursor: pointer; 
+    font-family: 'Prompt', sans-serif; font-size: 14px; font-weight: 500; transition: all 0.2s; 
+  }
+  .pill.active { background: var(--text-dark); color: white; border-color: var(--text-dark); }
+  .nav-pills::after { content: ''; flex: 0 0 10px; }
+  
+  /* ---------------- Content & Cards ---------------- */
+  .content-section { display: none; animation: slideUp 0.3s ease; }
+  .content-section.active { display: block; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header { font-size: 22px; margin-bottom: 20px; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+  
+  .card { background: var(--surface); border-radius: 24px; padding: 24px; margin-bottom: 20px; border: 1px solid #f0f0f0; box-shadow: 0 4px 20px rgba(0,0,0,0.02); scroll-margin-top: 100px; }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--primary); font-family: 'Prompt'; }
+
+  /* Timeline */
+  .timeline-container { padding: 10px 0; }
+  .timeline-item { position: relative; padding-left: 36px; margin-bottom: 22px; cursor: pointer; transition: all 0.2s; border-radius: 12px; padding-top: 6px; padding-bottom: 6px; }
+  .timeline-item:hover { background: #f4f8f7; }
+  .timeline-item::before { content: ''; position: absolute; left: 6px; top: 10px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #e2e8f0; background: var(--primary); z-index: 2; }
+  .timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 12px; top: 26px; bottom: -22px; width: 2px; background: #e2e8f0; z-index: 1; }
+  .timeline-title { font-weight: 600; font-size: 15px; color: var(--text-dark); margin-bottom: 4px; display:flex; align-items:center; gap: 8px;}
+  .timeline-badge { font-size: 11px; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .timeline-desc { font-size: 13px; color: var(--text-muted); }
+
+  /* Special Info Boxes */
+  .info-box { padding: 20px; border-radius: 16px; margin-bottom: 20px; border-left: 5px solid; }
+  .info-box h4 { margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .info-box ul, .info-box ol { margin-left: 20px; font-size: 14px; line-height: 1.8; }
+  .info-box p { font-size: 14px; line-height: 1.6; }
+  .box-yellow { background: var(--box-yellow-bg); border-left-color: var(--box-yellow-border); color: #856404; }
+  .box-green { background: var(--box-green-bg); border-left-color: var(--box-green-border); color: #1b5e20; }
+  .box-blue { background: var(--box-blue-bg); border-left-color: var(--box-blue-border); color: #0d47a1; }
+  .box-gray { background: #f8f9fa; border-left-color: #adb5bd; }
+
+  /* Grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .stat-card { background: var(--primary-light); padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 16px; }
+  .stat-icon { background: white; width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--primary); }
+  
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+  th { font-family: 'Prompt'; font-weight: 600; color: var(--text-dark); background: #fafafa; }
+
+  /* Modals */
+  .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 20px; }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal-content { background: white; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 24px; overflow-y: auto; }
+  
+  /* Survey & Test Styles */
+  .survey-question { margin-bottom: 20px; background: #fafafa; padding: 16px; border-radius: 16px; border: 1px solid #f0f0f0; }
+  .survey-question p { font-weight: 600; margin-bottom: 12px; font-size: 14px; }
+  .rating-group { display: flex; justify-content: space-between; max-width: 300px; }
+  .rating-group label { display: flex; flex-direction: column; align-items: center; cursor: pointer; gap: 5px; font-size: 12px; color: var(--text-muted); }
+  .rating-group input { transform: scale(1.2); accent-color: var(--primary); }
+
+  .emergency-question { background: var(--danger-light); padding: 14px 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffcdd2; }
+  .emergency-question p { font-size: 14px; font-weight: 500; color: #b71c1c; margin: 0; }
+  .emergency-radios { display: flex; gap: 15px; }
+  .emergency-radios label { font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .emergency-radios input { accent-color: var(--danger); transform: scale(1.1); }
+  
+  .epds-question { background: #fafafa; padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #eee; }
+  .epds-question p { font-weight: 600; margin-bottom: 10px; font-size: 15px; }
+  .radio-group label { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; cursor: pointer; }
+
+  /* Test Video Placeholder */
+  .video-placeholder { width: 100%; height: 250px; background: #f0f0f0; border: 2px dashed #ccc; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #888; font-size: 14px; font-weight: 500; flex-direction: column; gap: 8px; }
+
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo"><i data-lucide="heart-handshake" style="width:32px; height:32px;"></i></div>
+    <h1 class="auth-title">MomComfort</h1>
+    <p class="auth-subtitle" id="auth-mode-subtitle">เข้าสู่ระบบเพื่อดูแลตัวเองและลูกน้อย</p>
+    <div id="auth-error" class="auth-error"></div>
+    <form id="login-form" onsubmit="return handleLogin(event)">
+      <div class="form-group"><label>ชื่อผู้ใช้</label><input type="text" class="form-control" id="login-username" required></div>
+      <div class="form-group"><label>รหัสผ่าน</label><input type="password" class="form-control" id="login-password" required></div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">เข้าสู่ระบบ</button>
+      <p style="text-align: center; margin-top: 20px; font-size: 14px;">ยังไม่มีบัญชี? <a href="#" onclick="setAuthMode('register')" style="color: var(--primary); font-weight: 600;">สมัครสมาชิก</a></p>
+    </form>
+    <form id="register-form" class="hidden" onsubmit="return handleRegister(event)">
+      <div class="form-group"><label>ชื่อผู้ใช้</label><input type="text" class="form-control" id="register-username" required></div>
+      <div class="form-group"><label>รหัสผ่าน</label><input type="password" class="form-control" id="register-password" required minlength="4"></div>
+      <div class="form-group"><label>ยืนยันรหัสผ่าน</label><input type="password" class="form-control" id="register-password2" required minlength="4"></div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">สมัครสมาชิก</button>
+      <p style="text-align: center; margin-top: 20px; font-size: 14px;">มีบัญชีอยู่แล้ว? <a href="#" onclick="setAuthMode('login')" style="color: var(--primary); font-weight: 600;">เข้าสู่ระบบ</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP WRAPPER ================= -->
+<div id="app-wrapper" class="hidden">
+  
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-icon"><i data-lucide="heart-handshake"></i></div>
+      <div class="brand-name">MomComfort</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline" onclick="openModal('profile-modal')">⚙️ แก้ไขข้อมูล</button>
+      <button class="btn-outline" onclick="openModal('survey-modal')">⭐ ประเมินแอป</button>
+      <div class="user-badge">
+        <div class="user-info"><span class="user-name" id="mother-name-display">คุณแม่</span></div>
+        <button class="btn-icon" onclick="logout()" title="ออกจากระบบ"><i data-lucide="log-out" style="width:14px;height:14px;"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Navigation Pills -->
+    <div class="nav-pills-wrap">
+      <div class="nav-pills">
+        <button class="pill active" data-tab="home" onclick="switchTab('home')">🏠 หน้าหลัก</button>
+        <button class="pill" data-tab="testing" onclick="switchTab('testing')">📝 แบบทดสอบ</button>
+        <button class="pill" data-tab="body" onclick="switchTab('body')">💪 การเปลี่ยนแปลงร่างกาย</button>
+        <button class="pill" data-tab="breastfeed" onclick="switchTab('breastfeed')">🤱 การให้นม</button>
+        <button class="pill" data-tab="baby" onclick="switchTab('baby')">👶 ดูแลทารก</button>
+        <button class="pill" data-tab="mental" onclick="switchTab('mental')">🧠 สุขภาพจิต</button>
+        <button class="pill" data-tab="nutrition" onclick="switchTab('nutrition')">🥗 โภชนาการ</button>
+        <button class="pill" data-tab="family" onclick="switchTab('family')">👨‍👩‍👧 วางแผนครอบครัว</button>
+      </div>
+    </div>
+
+    <!-- TAB: TESTING -->
+    <section class="content-section" id="tab-testing">
+      <!-- ส่วนหน้า: แบบทดสอบก่อนเรียน -->
+      <div id="pre-test-section">
+        <h2 class="section-header">📝 แบบทดสอบก่อนเรียน</h2>
+
+        <!-- 1. แบบทดสอบ (ย้ายขึ้นมาด้านบน) -->
+        <div class="card">
+          <h3 class="card-title">❓ คำถามแบบทดสอบก่อนเรียน</h3>
+          <form id="pre-test-form">
+            <div class="survey-question">
+              <p>1. หากกระเพาะปัสสาวะเต็ม อาจทำให้มดลูกหดรัดตัวได้ไม่ดี</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="pre_q1" value="correct"> ถูก</label>
+                <label><input type="radio" name="pre_q1" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>2. การปัสสาวะทุก 2-4 ชั่วโมงหลังคลอดช่วยให้มดลูกเข้าอู่ได้ดีขึ้น</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="pre_q2" value="correct"> ถูก</label>
+                <label><input type="radio" name="pre_q2" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>3. หากคลึงมดลูกแล้วพบว่ามดลูกยังนิ่มร่วมกับมีเลือดออกมาก ควรรีบแจ้งพยาบาลทันที</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="pre_q3" value="correct"> ถูก</label>
+                <label><input type="radio" name="pre_q3" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>4. การคลึงมดลูกที่ถูกต้องควรคลึงเฉพาะบริเวณยอดมดลูก ไม่ควรกดบริเวณส่วนล่างของมดลูกแรง ๆ</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="pre_q4" value="correct"> ถูก</label>
+                <label><input type="radio" name="pre_q4" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>5. มารดาควรนวดคลึงมดลูกทุก 15 นาที</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="pre_q5" value="wrong"> ถูก</label>
+                <label><input type="radio" name="pre_q5" value="correct"> ผิด</label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2. คลิปวิดีโอให้ความรู้ (ย้ายลงมาด้านล่าง) -->
+        <div class="card">
+          <h3 class="card-title">🎥 คลิปวิดีโอให้ความรู้</h3>
+          <div class="video-placeholder">
+            <i data-lucide="play-circle" style="width:48px; height:48px; opacity:0.5;"></i>
+            <span>[ พื้นที่สำหรับใส่วิดีโอในอนาคต ]</span>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn btn-primary" onclick="showScoreModal('pre')">📊 ดูคะแนน ➔</button>
+        </div>
+      </div>
+
+      <!-- ส่วนหลัง: แบบทดสอบหลังเรียน -->
+      <div id="post-test-section" style="display:none;">
+        <h2 class="section-header">📝 แบบทดสอบหลังเรียน</h2>
+        
+        <div class="card">
+          <h3 class="card-title">❓ คำถามแบบทดสอบหลังเรียน</h3>
+          <p style="font-size:14px; color:var(--text-muted); margin-bottom:16px;">ประเมินความรู้ของคุณอีกครั้งหลังจากศึกษาเนื้อหาเรียบร้อยแล้ว</p>
+          <form id="post-test-form">
+            <div class="survey-question">
+              <p>1. หากกระเพาะปัสสาวะเต็ม อาจทำให้มดลูกหดรัดตัวได้ไม่ดี</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="post_q1" value="correct"> ถูก</label>
+                <label><input type="radio" name="post_q1" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>2. การปัสสาวะทุก 2-4 ชั่วโมงหลังคลอดช่วยให้มดลูกเข้าอู่ได้ดีขึ้น</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="post_q2" value="correct"> ถูก</label>
+                <label><input type="radio" name="post_q2" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>3. หากคลึงมดลูกแล้วพบว่ามดลูกยังนิ่มร่วมกับมีเลือดออกมาก ควรรีบแจ้งพยาบาลทันที</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="post_q3" value="correct"> ถูก</label>
+                <label><input type="radio" name="post_q3" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>4. การคลึงมดลูกที่ถูกต้องควรคลึงเฉพาะบริเวณยอดมดลูก ไม่ควรกดบริเวณส่วนล่างของมดลูกแรง ๆ</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="post_q4" value="correct"> ถูก</label>
+                <label><input type="radio" name="post_q4" value="wrong"> ผิด</label>
+              </div>
+            </div>
+            <div class="survey-question">
+              <p>5. มารดาควรนวดคลึงมดลูกทุก 15 นาที</p>
+              <div class="rating-group" style="justify-content: flex-start; gap: 30px;">
+                <label><input type="radio" name="post_q5" value="wrong"> ถูก</label>
+                <label><input type="radio" name="post_q5" value="correct"> ผิด</label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <button class="btn btn-outline" onclick="toggleTestView('pre')">⬅ กลับไปหน้าแบบทดสอบก่อนเรียน</button>
+          <button class="btn btn-primary" onclick="showScoreModal('post')">📊 ดูคะแนน ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: HOME -->
+    <section class="content-section active" id="tab-home">
+      <!-- ช่องพิมพ์บอกอาการแทน (ระบบคีย์เวิร์ดเรียลไทม์) -->
+      <div class="card" style="background: #fff8f8; border: 2px solid #ffcdd2;">
+        <h3 class="card-title" style="color: #c62828;">💬 พิมพ์บอกอาการผิดปกติหลังคลอดของคุณแม่</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">ระบบจะวิเคราะห์อาการของคุณอัตโนมัติ เช่น "มีไข้สูง", "เลือดออกมาก", "ซึมเศร้า"</p>
+        <textarea class="form-control" id="symptom-input" placeholder="พิมพ์อาการที่กำลังเจอ เช่น ปวดท้องรุนแรง มีไข้สูง..." oninput="checkSymptomKeywords()"></textarea>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-icon">👶</div>
+          <div><div style="font-size: 12px; color: var(--text-muted);">วัยของลูก</div><div style="font-weight: 700; font-size: 18px; color: var(--text-dark);" id="baby-age-display">0 วัน</div></div>
+        </div>
+        <div class="stat-card" style="background: #e3f2fd;">
+          <div class="stat-icon" style="color: #1976d2;">🕒</div>
+          <div><div style="font-size: 12px; color: var(--text-muted);">ให้นมครั้งล่าสุด</div><div style="font-weight: 700; font-size: 15px; color: var(--text-dark);" id="last-feeding-display">ยังไม่มีข้อมูล</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">📋 สิ่งที่ควรดูแลวันนี้</h3>
+        <div class="timeline-container">
+          <div class="timeline-item"><div class="timeline-title">จุดมุ่งหมาย: ให้นมแม่</div><div class="timeline-desc">ให้นมลูกทุก 2-3 ชั่วโมง หรือตามความต้องการของลูก</div></div>
+          <div class="timeline-item" onclick="scrollToSection('feed-section')"><div class="timeline-title">ติดตามเวลาให้นม <span class="timeline-badge">ไปหน้าบันทึก ➔</span></div><div class="timeline-desc">บันทึกข้างซ้าย/ขวา และปริมาณน้ำนม</div></div>
+          <div class="timeline-item" onclick="switchTab('body')"><div class="timeline-title">เช็กสุขภาพแม่ <span class="timeline-badge">อ่านข้อมูล ➔</span></div><div class="timeline-desc">ตรวจน้ำคาวปลา แผลฝีเย็บ และเต้านม</div></div>
+          <div class="timeline-item" onclick="scrollToSection('baby-section')"><div class="timeline-title">บันทึกข้อมูลลูก <span class="timeline-badge">ไปหน้าบันทึก ➔</span></div><div class="timeline-desc">ปัสสาวะ อุจจาระ และพฤติกรรมการนอน</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" id="feed-section">
+          <h3 class="card-title">🍼 บันทึกการให้นม</h3>
+          <div class="form-group"><label>ข้างที่ให้</label><select class="form-control" id="feed-side"><option value="" disabled selected>เลือกข้าง</option><option value="ซ้าย">ซ้าย</option><option value="ขวา">ขวา</option><option value="ทั้งสองข้าง">ทั้งสองข้าง</option></select></div>
+          <div class="form-group"><label>ปริมาณ (ออนซ์/มล.)</label><input type="text" class="form-control" id="feed-amount"></div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="saveFeeding()">บันทึกการให้นม</button>
+        </div>
+        <div class="card" id="baby-section">
+          <h3 class="card-title">👶 บันทึกข้อมูลลูก</h3>
+          <div class="form-group"><label>ปัสสาวะ (จำนวนครั้ง)</label><input type="number" class="form-control" id="baby-urine" placeholder="0"></div>
+          <div class="form-group"><label>อุจจาระ (จำนวนครั้ง)</label><input type="number" class="form-control" id="baby-stool" placeholder="0"></div>
+          <div class="form-group"><label>เวลานอน (ชั่วโมง)</label><input type="number" class="form-control" id="baby-sleep" placeholder="0"></div>
+          <div class="form-group"><label>น้ำหนัก (กิโลกรัม)</label><input type="number" step="0.01" class="form-control" id="baby-weight" placeholder="0"></div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="saveBabyData()">บันทึกข้อมูลลูก</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">📝 กิจกรรมล่าสุด</h3>
+        <div id="activity-feed" style="font-size: 14px; color: var(--text-muted);">ยังไม่มีกิจกรรม...</div>
+      </div>
+    </section>
+
+    <!-- TAB 2: BODY CHANGES -->
+    <section class="content-section" id="tab-body">
+      <h2 class="section-header">💪 การเปลี่ยนแปลงร่างกายหลังคลอด</h2>
+      <div class="info-box box-blue">
+        <h4>💡 วิธีคลึงมดลูก และการคลำมดลูก</h4>
+        <p>โดยการใช้มือข้างที่ถนัดวางบริเวณยอดมดลูก ให้รู้สึกว่ามดลูกอยู่ในอุ้งมือพอดี จากนั้นคลึงเบา ๆ ด้วยปลายนิ้ว วนไปทางเดียวกันเป็นวงกลมจนมดลูกหดรัดตัวกลมแข็ง นาน 1 นาที</p>
+      </div>
+      <div class="card"><h3 class="card-title">🗓️ สัปดาห์ที่ 1</h3><ul style="margin-left: 20px; line-height: 1.8; font-size: 15px;"><li><b>มดลูกเข้าอู่:</b> มดลูกหดตัวอย่างรวดเร็ว หนักประมาณ 1 กิโลกรัม</li><li><b>น้ำคาวปลา:</b> เลือดออกมากมาย สีแดงสด จำนวนมากที่สุด</li><li><b>เต้านม:</b> เริ่มคัดเต้า (เต้านมแข็ง คัดตึง)</li><li><b>แผลฝีเย็บ:</b> มีความเจ็บปวด ปั้นยา และทำความสะอาดอย่างสม่ำเสมอ</li></ul></div>
+      <div class="card"><h3 class="card-title">🗓️ สัปดาห์ที่ 2-3</h3><ul style="margin-left: 20px; line-height: 1.8; font-size: 15px;"><li><b>น้ำคาวปลา:</b> ค่อยๆ ลดลง สีเปลี่ยนเป็นสีน้ำตาล แล้วสีเหลือง</li><li><b>เต้านม:</b> อาจยังคัดตึง หัวนมอาจแตก</li><li><b>แผลฝีเย็บ:</b> ค่อยๆ ดีขึ้น เจ็บปวดน้อยลง</li><li><b>ปวดท้อง:</b> ปวดมดลูก เมื่อให้นม (ลดลงทีละน้อย)</li></ul></div>
+      <div class="card"><h3 class="card-title">🗓️ สัปดาห์ที่ 4-6</h3><ul style="margin-left: 20px; line-height: 1.8; font-size: 15px;"><li><b>น้ำคาวปลา:</b> เบาๆ สีขาวเหลืองอ่อน</li><li><b>น้ำหนัก:</b> เริ่มลดลง ประมาณ 0.5 กิโลกรัมต่อสัปดาห์</li><li><b>ปวดท้อง:</b> หายไป สามารถออกกำลังกายได้เบาๆ</li><li><b>การกลับมาของประจำเดือน:</b> โดยปกติหลังจาก 6-8 สัปดาห์ (อาจช้ากว่าถ้าให้นม)</li></ul></div>
+      <div class="info-box box-yellow"><h4>⚠️ เมื่อไหร่ควรพบแพทย์?</h4><ul><li>น้ำคาวปลากลิ่นเหม็น หรือมีไข้สูง</li><li>เลือดออกมากผิดปกติ (ใช้ผ้าอนามัยชุ่ม)</li><li>แผลฝีเย็บหรือแผลผ่าตัดมีสัญญาณการติดเชื้อ (แดง บวม อุ่น)</li><li>ปวดท้องรุนแรง</li><li>เต้านมแดง บวม ร้อน มีไข้ (เต้านมอักเสบ)</li></ul></div>
+    </section>
+
+    <!-- TAB 3: BREASTFEEDING -->
+    <section class="content-section" id="tab-breastfeed">
+      <h2 class="section-header">🤱 การให้นม</h2>
+      <div class="info-box box-blue"><h4>วิธีเข้าเต้าที่ถูกต้อง</h4><ul><li>ปากลูกควรปิดเต้านมทั้งหมด รวมถึงหัวนมและลานนม</li><li>เต้าเหลือบนต้องปรากฏในปากลูก</li><li>ลูกควรหัวเงยขึ้นมาเล็กน้อย (ไม่ก้ม)</li><li>ปากลูกควรกระตุกขึ้น-ลงอย่างช้าๆ ไม่เจ็บ</li><li>อาจได้ยินเสียงลูกกลืน</li></ul></div>
+      <div class="card"><h3 class="card-title">ท่าให้นมที่นิยม</h3><div class="grid-2"><div class="info-box box-gray" style="margin:0;"><b>1. ท่านั่ง (Cradle Hold)</b><br>นั่ง หลังของแม่ระนาบ ลูกนั่งแนบซ้ายหรือขวา</div><div class="info-box box-gray" style="margin:0;"><b>2. ท่านอน (Side Lying)</b><br>แม่ลูกนอนตะแคงเข้าหากัน ลูกไหล่รื่นด้านข้างแม่</div><div class="info-box box-gray" style="margin:0;"><b>3. ท่าแม่ชี้นิ้ว (Football Hold)</b><br>แม่วางลูกไว้ด้านข้างสะโพก คล้ายถือลูกบอล</div><div class="info-box box-gray" style="margin:0;"><b>4. ท่านั่งข้าม (Cross Cradle)</b><br>ลูกนั่งขัดสมาธิแม่ เหมาะสำหรับเด็กแรกเกิด</div></div></div>
+      <div class="card"><h3 class="card-title">แก้ปัญหาเรื่องนม</h3><ul style="margin-left: 20px; line-height: 1.8; font-size: 15px;"><li><b>หัวนมแตก:</b> ใช้ยาลดการอักเสบ, เก็บน้ำนมเล็กน้อยทาหัวนม, เปลี่ยนท่าให้นม</li><li><b>เต้านมคัดตึง:</b> ประคบอุ่น นวดเบาๆ, ให้นมบ่อยขึ้น, นอนหลัง</li><li><b>เต้านมอักเสบ:</b> ประคบอุ่นก่อนให้นม, ประคบเย็นหลังให้นม, พบแพทย์</li><li><b>น้ำนมไม่ออก:</b> ให้นมบ่อยขึ้น, นวดเต้า, ดื่มน้ำมาก, พักผ่อนอย่างพอเพียง</li></ul></div>
+      <div class="info-box box-green"><h4>✅ อาหารเพิ่มน้ำนม</h4><p>กินอาหารต่อไปนี้เพื่อเพิ่มปริมาณน้ำนม:</p><ul style="margin-top: 5px;"><li>ข้าว หรือธัญพืช (ข้าวกล้อง, ข้าวไรซ์เบอร์รี่)</li><li>ปลา, ไก่, ไข่</li><li>ถั่ว, งา, นมสด</li><li>ผัก, ผลไม้ โดยเฉพาะบลูเบอร์รี่</li><li>ดื่มน้ำสมุนไพร เช่น เมล็ดขนุน, สะระแหน่, ขิง, หัวปลี</li></ul></div>
+    </section>
+
+    <!-- TAB 4: BABY CARE -->
+    <section class="content-section" id="tab-baby">
+      <h2 class="section-header">👶 ดูแลทารก</h2>
+      <div class="card"><h3 class="card-title">🛁 อาบน้ำ</h3><ul style="margin-left: 20px; line-height: 1.8;"><li>เตรียมสถานที่อบอุ่น ปิดหน้าต่าง</li><li>อุณหภูมิน้ำควร 37°C (ใช้ตัววัดอุณหภูมิหรือทดลองด้วยศอก)</li><li>ใช้วิธีเร็ว ๆ (ประมาณ 5-10 นาที)</li><li>ใช้สบู่อ่อน หรือเพียงน้ำเปล่าสำหรับเด็กแรกเกิด</li><li>ให้ความสนใจที่สะดือทำลังแห้ง (อย่าให้น้ำเข้า)</li><li>เช็ดให้แห้ง ใส่ผ้าสาลู ห่อหน้าอกเบาๆ</li></ul></div>
+      <div class="card"><h3 class="card-title">🩹 ดูแลสะดือ</h3><ul style="margin-left: 20px; line-height: 1.8;"><li>ทำความสะอาดสะดือด้วยน้ำอุ่นหรือแอลกอฮอล์ 70%</li><li>ถูด้วยผ้าสะอาด ให้แห้ง</li><li>พับผ้าอ้อมหลวม ให้ลมผ่านถึงจะหลุด (โดยปกติ 1-3 สัปดาห์)</li><li>เมื่อหลุดแล้ว ให้แห้ง ถ้ามีเลือดออกเล็กน้อยเป็นเรื่องปกติ</li></ul></div>
+      <div class="info-box box-green"><h4>✅ การนอนปลอดภัย</h4><ul><li>นอนด้านหลัง (สำคัญมากเมื่อเด็ก)</li><li>เตียงแข็งและเรียบ (ไม่นอนหมอน ผ้าห่มตุ๊กตา)</li><li>อุณหภูมิห้องอบอุ่นกำลังดี</li><li>หลีกเลี่ยงการนอนในเตียงเดียวกับบุคคลอื่น (ผู้ใหญ่)</li><li>นอนสุดร่ายตามความสะดวก (อาจใช้จุกหลอก)</li></ul></div>
+      <div class="info-box box-yellow"><h4>🟡 ตัวเหลือง (Jaundice)</h4><p><b>สัญญาณ:</b> ผิวหนังเหลือง ตาขาว เหลือง</p><p><b>เมื่อไหร่ต้องพบแพทย์:</b></p><ul><li>ตัวเหลืองในวัน 1 หรือ 2 หลังคลอด</li><li>ตัวเหลืองรุนแรง</li><li>เด็กดื่มน้ำนมไม่ค่อยจะดีขึ้น</li></ul><p><b>วิธีป้องกัน:</b> ให้นมบ่อยๆ (8-12 ครั้งต่อวัน) นอนแสงแดดวันเช้า</p></div>
+      <div class="card"><h3 class="card-title">💉 ตารางวัคซีน</h3><table><tr><th>อายุ</th><th>วัคซีน</th></tr><tr><td>แรกเกิด</td><td>วัคซีน BCG, ไวรัสตับอักเสบบี</td></tr><tr><td>1 เดือน</td><td>วัคซีนตับอักเสบบี (DPT+HiB+IPV)</td></tr><tr><td>2 เดือน</td><td>วัคซีนคอตีบ-บาดทะยัก-ไอกรน, โปลิโอ</td></tr><tr><td>3 เดือน</td><td>วัคซีนรวม</td></tr><tr><td>4 เดือน</td><td>วัคซีนรวม</td></tr></table></div>
+    </section>
+
+    <!-- TAB 5: MENTAL HEALTH -->
+    <section class="content-section" id="tab-mental">
+      <h2 class="section-header">🧠 สุขภาพจิตมารดา</h2>
+      <div class="grid-2" style="margin-bottom: 20px;"><div class="info-box box-yellow" style="margin:0;"><h4>Baby Blues (ปกติ)</h4><ul><li>เกิดวัน 3-5 หลังคลอด</li><li>ร้องไห้ง่าย, กังวล, อารมณ์เปลี่ยน</li><li>หายไปภายใน 2 สัปดาห์</li></ul></div><div class="info-box" style="background: #ffebee; border-left-color: #ef5350; margin:0;"><h4 style="color: #c62828;">ซึมเศร้าหลังคลอด (PPD)</h4><ul style="color: #c62828;"><li>เกิด 2 สัปดาห์ - 1 ปีหลังคลอด</li><li>ซึมเศร้าถาวร, สูญเสียความสนใจ</li><li>ต้องการการรักษา</li></ul></div></div>
+      <div class="card" style="text-align: center; padding: 40px 20px;"><h3 class="font-prompt" style="font-size: 20px; margin-bottom: 10px; color: var(--primary);">🔍 แบบประเมินสุขภาพจิต EPDS</h3><p style="color: var(--text-muted); margin-bottom: 24px;">Edinburgh Postnatal Depression Scale - แบบประเมิน 10 ข้อเพื่อตรวจสอบภาวะซึมเศร้า</p><button class="btn btn-primary" onclick="openModal('epds-modal')">ทำแบบประเมิน EPDS ตอนนี้</button><p style="color: var(--text-muted); font-size: 12px; margin-top: 16px;">⚠️ แบบประเมินนี้เป็นเพียงเครื่องมือคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัยทางการแพทย์ หากมีอาการรุนแรงหรือคิดทำร้ายตัวเอง โปรดติดต่อแพทย์หรือสายด่วนสุขภาพจิต 1323 ทันที</p></div>
+      <div class="info-box box-green"><h4>💚 วิธีดูแลตัวเอง</h4><ul><li>นอนพักผ่อน หลีกเลี่ยงความเหนื่อยล้า</li><li>ทานอาหารที่มีสารอาหารครบ</li><li>ออกกำลังกาย เช่น เดิน โยคะเบาๆ</li><li>ใจเย็นกับตัวเอง อย่ารีบเร่ง</li><li>คุยกับครอบครัว เพื่อน หรือบุคลากรสขภาพ</li><li>ปฏิเสธการช่วยเหลือหากจำเป็น (ให้คนอื่นช่วยเลี้ยงลูกบ้าง)</li></ul></div>
+    </section>
+
+    <!-- TAB 6: NUTRITION -->
+    <section class="content-section" id="tab-nutrition">
+      <h2 class="section-header">🥗 โภชนาการและการฟื้นตัว</h2>
+      <div class="card"><h3 class="card-title">🍽️ อาหารที่ดีต่อสุขภาพแม่หลังคลอด</h3><div class="grid-4"><div class="info-box box-gray" style="padding: 15px; margin:0;"><b>โปรตีน</b><br><span style="font-size:12px;">ปลา, ไก่, ไข่, นม, ถั่ว (ช่วยฟื้นตัวแผล)</span></div><div class="info-box box-gray" style="padding: 15px; margin:0;"><b>เหล็ก</b><br><span style="font-size:12px;">เนื้อแดง, ใบเหลียง, ผลไม้แห้ง (ป้องกันโลหิตจาง)</span></div><div class="info-box box-gray" style="padding: 15px; margin:0;"><b>แคลเซียม</b><br><span style="font-size:12px;">นมสด, เนยแข็ง, ปลาเล็กปลาน้อย (สำคัญสร้างน้ำนม)</span></div><div class="info-box box-gray" style="padding: 15px; margin:0;"><b>ไฟเบอร์</b><br><span style="font-size:12px;">ผักใบเขียว, ข้าวกล้อง, ผลไม้ (ช่วยขับถ่าย)</span></div></div></div>
+      <div class="card"><h3 class="card-title">💧 การดื่มน้ำ</h3><ul style="margin-left: 20px; line-height: 1.8;"><li>ดื่มน้ำ 8-10 แก้ว (2-3 ลิตร) ต่อวัน</li><li>ดื่มตลอดเวลา โดยเฉพาะเมื่อให้นม</li><li>ส่วนผสมของน้ำ นมสด น้ำสมุนไพร ชา</li><li>หลีกเลี่ยง แอลกอฮอล์, คาเฟอีนมากเกินไป</li></ul></div>
+      <div class="card"><h3 class="card-title">🏃‍♀️ การออกกำลังกายหลังคลอด</h3><ul style="margin-left: 20px; line-height: 1.8;"><li><b>สัปดาห์ 1-2:</b> พักบ้าน หลีกเลี่ยงการออกกำลังกาย</li><li><b>สัปดาห์ 3-4:</b> เดินเบาๆ ที่บ้าน การออกกำลังแบบ Kegel</li><li><b>หลังจาก 6-8 สัปดาห์:</b> เพิ่มกิจกรรม โยคะ ว่ายน้ำเบาๆ (ไม่สำหรับผู้ผ่าตัดหรือเจ็บแผล)</li><li><b>Kegel Exercise:</b> บีบกล้ามเนื้อช่องคลอด 5 วินาที ปล่อยพัก 5 วินาที ทำ 10 ครั้ง 3 ครั้งต่อวัน</li></ul></div>
+      <div class="info-box box-yellow"><h4>⚠️ อาหารและสิ่งที่ควรหลีกเลี่ยง</h4><ul><li>อาหารเย็นหรือหมัก (อาจมีแบคทีเรีย)</li><li>อาหารที่มีเครื่องเทศหรือรสเผ็ดจัด (อาจส่งผ่านให้นม)</li><li>แอลกอฮอล์ (ส่งผ่านให้นม)</li><li>คาเฟอีนมากเกินไป (ทำให้เด็กตื่นตระหนก)</li><li>ยาบางชนิด (ปรึกษาแพทย์ก่อนกิน)</li></ul></div>
+    </section>
+
+    <!-- TAB 7: FAMILY PLANNING -->
+    <section class="content-section" id="tab-family">
+      <h2 class="section-header">👨‍👩‍👧 การวางแผนครอบครัว</h2>
+      <div class="card"><h3 class="card-title">🗓️ การตกไข่หลังคลอด</h3><ul style="margin-left: 20px; line-height: 1.8;"><li>หากไม่ให้นม: การตกไข่อาจเกิดขึ้นภายใน 4-6 สัปดาห์</li><li>หากให้นม: อาจช้ากว่า (ได้รับการป้องกัน โดยฮอร์โมน prolactin)</li><li>ประจำเดือนมักกลับมา 6-8 สัปดาห์หลังคลอด (ถ้าไม่ให้นม)</li><li>หลังจากประจำเดือนครั้งแรก สามารถตั้งครรภ์ได้ทันที</li></ul></div>
+      <div class="card"><h3 class="card-title">💊 วิธีคุมกำเนิด</h3><ul style="margin-left: 20px; line-height: 1.8;"><li><b>1. ยาคุมสำหรับแม่ให้นม (Mini Pill):</b> มีฮอร์โมนเล็กน้อย ปลอดภัยสำหรับให้นม</li><li><b>2. ยาคุมรูป (Birth Control Pills):</b> ต้องรอหลังจากให้นม 6 เดือน</li><li><b>3. ห่วงอนามัย (IUD/Coil):</b> ใส่ได้หลังจาก 6 สัปดาห์ ป้องกัน 3-10 ปี</li><li><b>4. เข็มฝังคุม (Implant):</b> ฝังใต้ผิวหนังที่แขน ได้ 3 ปี</li><li><b>5. ถุงยาง:</b> ปลอดภัย ไม่มีฮอร์โมน ใช้ได้ทันที</li><li><b>6. วิธี LAM (Lactational Amenorrhea Method):</b> ให้นมเต็มอาหาร อาจป้องกันการตกไข 6 เดือนแรก</li></ul></div>
+      <div class="card"><h3 class="card-title">🚫 การมีเพศสัมพันธ์อย่างปลอดภัย</h3><p><b>เมื่อจะเริ่มใหม่:</b></p><ul style="margin-left: 20px; margin-bottom: 15px;"><li>หลังจาก 4-6 สัปดาห์ (ถ้าไม่มีภาวะแทรกซ้อน)</li><li>แม่ควรรู้สึกพร้อมทางกาย จิตใจ</li><li>หลีกเลี่ยง หากมีความเจ็บปวด เลือดออก หรือแผลไม่หายแล้ว</li></ul><p><b>วิธีป้องกัน:</b></p><ul style="margin-left: 20px;"><li>ใช้ถุงยางเสมอ (ถึงแม้ให้นม)</li><li>ใช้ยาคุมพร้อมถุงยาง (เพิ่มความปลอดภัย)</li><li>ตรวจสอบก่อนที่แผลหายแล้ว</li></ul></div>
+      <div class="info-box box-green"><h4>✅ ช่วงเวลาปลอดภัยในการตั้งครรภ์</h4><p>หากต้องการลูกคนที่ 2:</p><ul><li>พบแพทย์เพื่อตรวจสอบว่าแม่พร้อมแล้ว</li><li>รอหลังจากคลอดอย่างน้อย 18-24 เดือน (ช่วยให้ร่างกายฟื้นตัว)</li><li>หยุดยาคุมก่อนพยายามตั้งครรภ์ 1 เดือน</li></ul></div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- Modal: แสดงผลคะแนนแบบทดสอบ -->
+<div class="modal-overlay" id="score-modal">
+  <div class="modal-content" style="max-width: 400px; text-align: center;">
+    <div class="modal-header">
+      <h3 class="font-prompt" style="color: var(--primary);">ผลคะแนนแบบทดสอบ</h3>
+      <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeModal('score-modal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
+      <h2 style="font-family:'Prompt'; color:var(--text-dark); margin-bottom: 8px;">คุณทำคะแนนได้</h2>
+      <div id="score-result-text" style="font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 20px;">4 / 5 คะแนน</div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;" id="score-desc">ยอดเยี่ยมมาก! คุณมีความเข้าใจในเนื้อหาการดูแลหลังคลอดเป็นอย่างดี</p>
+      
+      <div id="score-modal-action-btn">
+        <!-- ปุ่มจะสลับตามเงื่อนไข JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: แจ้งเตือนอาการฉุกเฉินจากคีย์เวิร์ด (พิมพ์บอกอาการ) -->
+<div class="modal-overlay" id="keyword-alert-modal">
+  <div class="modal-content" style="max-width: 420px; border-top: 6px solid var(--danger);">
+    <div class="modal-header" style="background: var(--danger-light); border-bottom: none;">
+      <h3 class="font-prompt" style="color: #c62828;">🚨 แจ้งเตือนสัญญาณอันตราย</h3>
+      <button style="background:none; border:none; font-size:24px; cursor:pointer; color: #c62828;" onclick="closeModal('keyword-alert-modal')">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align: left;">
+      <p style="font-size: 15px; font-weight: 600; color: #c62828; margin-bottom: 10px;">พบคำสำคัญที่บ่งบอกถึงภาวะแทรกซ้อนหลังคลอด!</p>
+      <p style="font-size: 14px; color: var(--text-dark); line-height: 1.6; margin-bottom: 20px;">
+        จากอาการที่คุณพิมพ์เข้ามา ระบบตรวจพบความผิดปกติที่ต้องได้รับการดูแลจากแพทย์โดยด่วน กรุณาติดต่อโรงพยาบาลหรือสายด่วนฉุกเฉินทันที
+      </p>
+      <div style="background: #fff3e0; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px;">
+        📞 <b>เบอร์ฉุกเฉิน:</b> 1669<br>
+        📞 <b>สายด่วนสุขภาพจิต:</b> 1323
+      </div>
+      <button class="btn btn-danger" style="width: 100%;" onclick="closeModal('keyword-alert-modal')">รับทราบและติดต่อแพทย์</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal อื่นๆ -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-header"><h3 class="font-prompt" style="color: var(--primary);">แก้ไขข้อมูลส่วนตัว</h3><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeModal('profile-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>ชื่อแม่</label><input type="text" class="form-control" id="edit-profile-name" placeholder="คุณแม่"></div>
+      <div class="form-group"><label>วันที่คลอด (เพื่อคำนวณอายุลูก)</label><input type="date" class="form-control" id="edit-profile-date"></div>
+      <div style="display: flex; gap: 10px; margin-top: 20px;"><button class="btn btn-primary" style="flex: 1;" onclick="saveProfile()">บันทึก</button><button class="btn btn-outline" style="flex: 1;" onclick="closeModal('profile-modal')">ยกเลิก</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="survey-modal">
+  <div class="modal-content">
+    <div class="modal-header"><h3 class="font-prompt" style="color: var(--primary);">📝 ความพึงพอใจในการใช้แอป</h3><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeModal('survey-modal')">&times;</button></div>
+    <div class="modal-body">
+      <p style="text-align: center; font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">ช่วยเราให้ดีขึ้น! โปรดให้คะแนนความพึงพอใจของคุณ (1 = น้อยที่สุด, 5 = มากที่สุด)</p>
+      <form id="survey-form">
+        <div class="survey-question"><p>แอปพลิเคชันนี้ช่วยให้คุณดูแลตัวเองได้ดีขึ้นหรือไม่?</p><div class="rating-group"><label><input type="radio" name="sv1" value="1"> 1 ⭐</label><label><input type="radio" name="sv1" value="2"> 2 ⭐</label><label><input type="radio" name="sv1" value="3"> 3 ⭐</label><label><input type="radio" name="sv1" value="4"> 4 ⭐</label><label><input type="radio" name="sv1" value="5"> 5 ⭐</label></div></div>
+        <div class="survey-question"><p>เนื้อหาที่ให้ไว้มีประโยชน์และเหมาะสมหรือไม่?</p><div class="rating-group"><label><input type="radio" name="sv2" value="1"> 1 ⭐</label><label><input type="radio" name="sv2" value="2"> 2 ⭐</label><label><input type="radio" name="sv2" value="3"> 3 ⭐</label><label><input type="radio" name="sv2" value="4"> 4 ⭐</label><label><input type="radio" name="sv2" value="5"> 5 ⭐</label></div></div>
+        <div class="survey-question"><p>ฟีเจอร์บันทึกข้อมูล (นม ลูก) ใช้งานง่ายหรือไม่?</p><div class="rating-group"><label><input type="radio" name="sv3" value="1"> 1 ⭐</label><label><input type="radio" name="sv3" value="2"> 2 ⭐</label><label><input type="radio" name="sv3" value="3"> 3 ⭐</label><label><input type="radio" name="sv3" value="4"> 4 ⭐</label><label><input type="radio" name="sv3" value="5"> 5 ⭐</label></div></div>
+        <div class="survey-question"><p>ข้อเสนอแนะหรือความเห็น (ไม่บังคับ)</p><textarea class="form-control" placeholder="บอกเราว่าจะปรับปรุงได้อย่างไร..."></textarea></div>
+        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="submitSurvey()">ส่งแบบประเมิน</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="epds-modal">
+  <div class="modal-content">
+    <div class="modal-header"><h3 class="font-prompt" style="color: var(--primary);">EPDS แบบประเมิน</h3><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeModal('epds-modal')">&times;</button></div>
+    <div class="modal-body">
+      <form id="epds-form">
+        <div class="epds-question"><p>1. ฉันได้สัมผัสความสุขและอารมณ์ขันดี</p><div class="radio-group"><label><input type="radio" name="q1" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q1" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q1" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q1" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>2. ฉันดูเหมือนจะหัวเราะและเห็นความตลกของสิ่งต่างๆ ได้</p><div class="radio-group"><label><input type="radio" name="q2" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q2" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q2" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q2" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>3. ฉันรู้สึกว่าตนเองมีค่า</p><div class="radio-group"><label><input type="radio" name="q3" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q3" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q3" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q3" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>4. ฉันรู้สึกกังวลหรือว้าวุ่นใจโดยไม่มีสาเหตุ</p><div class="radio-group"><label><input type="radio" name="q4" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q4" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q4" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q4" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>5. ฉันรู้สึกหวาดกลัวหรือตื่นตระหนกโดยไม่มีสาเหตุ</p><div class="radio-group"><label><input type="radio" name="q5" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q5" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q5" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q5" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>6. ฉันรู้สึกทับถมด้วยงานจนรับไม่ไหว</p><div class="radio-group"><label><input type="radio" name="q6" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q6" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q6" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q6" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>7. ฉันรู้สึกไม่มีความสุขจนนอนไม่หลับ</p><div class="radio-group"><label><input type="radio" name="q7" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q7" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q7" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q7" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>8. ฉันรู้สึกเศร้าหรือหดหู่</p><div class="radio-group"><label><input type="radio" name="q8" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q8" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q8" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q8" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>9. ฉันร้องไห้โดยไม่มีสาเหตุ</p><div class="radio-group"><label><input type="radio" name="q9" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q9" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q9" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q9" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <div class="epds-question"><p>10. ฉันมีความคิดที่จะทำร้ายตัวเอง</p><div class="radio-group"><label><input type="radio" name="q10" value="0" required> ไม่เลย (0)</label><label><input type="radio" name="q10" value="1"> นานๆ ครั้ง (1)</label><label><input type="radio" name="q10" value="2"> บ่อยครั้ง (2)</label><label><input type="radio" name="q10" value="3"> มากบ่อยครั้ง (3)</label></div></div>
+        <button type="button" class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="calculateEPDS()">คำนวณคะแนน</button>
+      </form>
+      <div id="epds-result" style="margin-top: 20px; padding: 15px; border-radius: 12px; display: none; font-weight: 600; text-align: center;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+  restoreSession();
+
+  /* ---------------- GAS URL (Google Sheets Database) ---------------- */
+  const GAS_URL = "https://script.google.com/macros/s/AKfycby1xWeJMlgVbS_b1dci79hRUTAIxdPQNL6YgeGWH5BrMD6B8RS4xeNVrXjgJtGTQBWMQQ/exec";
+
+  /* ---------------- API HELPER ---------------- */
+  // เรียก Google Apps Script ด้วย POST แบบ form-urlencoded (ไม่ต้องใช้ CORS preflight)
+  async function callAPI(action, params) {
+    const body = new URLSearchParams({ action, ...params });
+    const res = await fetch(GAS_URL, { method: 'POST', body });
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (err) {
+      return { status: 'error', message: 'invalid_response: ' + text };
+    }
+  }
+
+  function setButtonLoading(btn, loading, loadingText) {
+    if (!btn) return;
+    if (loading) {
+      btn.dataset.originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = loadingText || 'กำลังบันทึก...';
+    } else {
+      btn.disabled = false;
+      if (btn.dataset.originalText) btn.innerHTML = btn.dataset.originalText;
+    }
+  }
+
+  /* ---------------- AUTHENTICATION & PROFILE ---------------- */
+  let currentUser = null;
+  let deliveryDate = null;
+  let babyAgeInterval = null;
+
+  function setAuthMode(mode) {
+    document.getElementById('auth-error').classList.remove('show');
+    if (mode === 'register') {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+    } else {
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    }
+  }
+
+  function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    document.getElementById('auth-error').classList.remove('show');
+    setButtonLoading(btn, true, 'กำลังเข้าสู่ระบบ...');
+    try {
+      const result = await callAPI('login', { username, password });
+      if (result.status === 'success') {
+        await enterApp(username, result.motherName, result.deliveryDate);
+      } else {
+        showAuthError(result.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+      }
+    } catch (err) {
+      showAuthError('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setButtonLoading(btn, false);
+    }
+    return false;
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const username = document.getElementById('register-username').value.trim();
+    const password = document.getElementById('register-password').value;
+    const password2 = document.getElementById('register-password2').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    document.getElementById('auth-error').classList.remove('show');
+
+    if (password !== password2) {
+      showAuthError('รหัสผ่านไม่ตรงกัน กรุณาลองใหม่');
+      return false;
+    }
+
+    setButtonLoading(btn, true, 'กำลังสมัครสมาชิก...');
+    try {
+      const result = await callAPI('register', { username, password });
+      if (result.status === 'success') {
+        await enterApp(username, username, result.deliveryDate || '');
+      } else if (result.message === 'exists') {
+        showAuthError('มีชื่อผู้ใช้นี้อยู่แล้ว กรุณาใช้ชื่ออื่น');
+      } else {
+        showAuthError(result.message || 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่');
+      }
+    } catch (err) {
+      showAuthError('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setButtonLoading(btn, false);
+    }
+    return false;
+  }
+
+  async function enterApp(user, motherName, savedDeliveryDate) {
+    currentUser = user;
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app-wrapper').classList.remove('hidden');
+    document.getElementById('mother-name-display').textContent = 'คุณ ' + (motherName || user);
+    document.getElementById('edit-profile-name').value = motherName || user;
+
+    // จำ session ไว้เพื่อไม่ต้อง login ใหม่ทุกครั้งที่รีเฟรชหน้า
+    try {
+      localStorage.setItem('momcomfort_session', JSON.stringify({
+        username: user,
+        motherName: motherName || user,
+        deliveryDate: savedDeliveryDate || ''
+      }));
+    } catch (err) {
+      console.warn('ไม่สามารถบันทึก session ได้', err);
+    }
+
+    if (savedDeliveryDate) {
+      document.getElementById('edit-profile-date').value = savedDeliveryDate;
+      applyDeliveryDate(savedDeliveryDate);
+    }
+
+    // โหลดกิจกรรมล่าสุดของผู้ใช้จาก Google Sheets
+    try {
+      const result = await callAPI('getActivities', { username: user });
+      if (result.status === 'success' && Array.isArray(result.activities)) {
+        activities = result.activities.map(a => ({
+          date: formatSheetDate(a.timestamp),
+          text: a.detail
+        }));
+        updateActivityFeed();
+        const lastFeed = result.activities.find(a => a.type === 'feeding');
+        if (lastFeed) {
+          document.getElementById('last-feeding-display').textContent = formatSheetDate(lastFeed.timestamp);
+        }
+      }
+    } catch (err) {
+      // ถ้าโหลดกิจกรรมไม่สำเร็จ ไม่ต้อง block การใช้งานแอป
+      console.warn('โหลดกิจกรรมไม่สำเร็จ', err);
+    }
+  }
+
+  // ตรวจสอบว่ามี session ที่จำไว้หรือไม่ ตอนเปิดหน้าเว็บ
+  async function restoreSession() {
+    try {
+      const raw = localStorage.getItem('momcomfort_session');
+      if (!raw) return;
+      const session = JSON.parse(raw);
+      if (session && session.username) {
+        await enterApp(session.username, session.motherName, session.deliveryDate);
+      }
+    } catch (err) {
+      console.warn('กู้คืน session ไม่สำเร็จ', err);
+    }
+  }
+
+  function formatSheetDate(isoLike) {
+    const d = new Date(isoLike);
+    if (isNaN(d.getTime())) return isoLike;
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function applyDeliveryDate(dateStr) {
+    deliveryDate = new Date(dateStr);
+    updateBabyAgeDisplay();
+    // อัปเดตวัยของลูกแบบเรียลไทม์ทุก 1 นาที โดยไม่ต้อง refresh หน้าเว็บ
+    if (babyAgeInterval) clearInterval(babyAgeInterval);
+    babyAgeInterval = setInterval(updateBabyAgeDisplay, 60 * 1000);
+  }
+
+  function updateBabyAgeDisplay() {
+    if (!deliveryDate || isNaN(deliveryDate.getTime())) return;
+    const today = new Date();
+    const diffTime = Math.abs(today - deliveryDate);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById('baby-age-display').textContent = `${diffDays} วัน`;
+  }
+
+  function logout() {
+    currentUser = null;
+    activities = [];
+    if (babyAgeInterval) { clearInterval(babyAgeInterval); babyAgeInterval = null; }
+    try { localStorage.removeItem('momcomfort_session'); } catch (err) {}
+    document.getElementById('app-wrapper').classList.add('hidden');
+    document.getElementById('auth-screen').classList.remove('hidden');
+    document.getElementById('login-form').reset();
+    document.getElementById('activity-feed').innerHTML = 'ยังไม่มีกิจกรรม...';
+    document.getElementById('last-feeding-display').textContent = 'ยังไม่มีข้อมูล';
+    document.getElementById('baby-age-display').textContent = '0 วัน';
+  }
+
+  /* ---------------- MODAL MANAGEMENT ---------------- */
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  /* ---------------- PROFILE LOGIC ---------------- */
+  async function saveProfile() {
+    const newName = document.getElementById('edit-profile-name').value;
+    const newDate = document.getElementById('edit-profile-date').value;
+
+    if (newName) document.getElementById('mother-name-display').textContent = 'คุณ ' + newName;
+    if (newDate) applyDeliveryDate(newDate);
+
+    try {
+      await callAPI('saveProfile', {
+        username: currentUser,
+        motherName: newName || '',
+        deliveryDate: newDate || ''
+      });
+      try {
+        const raw = localStorage.getItem('momcomfort_session');
+        if (raw) {
+          const session = JSON.parse(raw);
+          if (newName) session.motherName = newName;
+          if (newDate) session.deliveryDate = newDate;
+          localStorage.setItem('momcomfort_session', JSON.stringify(session));
+        }
+      } catch (e) {}
+      closeModal('profile-modal');
+      alert('บันทึกข้อมูลส่วนตัวสำเร็จ!');
+    } catch (err) {
+      closeModal('profile-modal');
+      alert('บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    }
+  }
+
+  /* ---------------- REAL-TIME SYMPTOM KEYWORD CHECKER ---------------- */
+  function checkSymptomKeywords() {
+    const text = document.getElementById('symptom-input').value.toLowerCase();
+    const keywords = [
+      'เลือดออก', 'ตกเลือด', 'ไข้', 'หนาวสั่น', 'หายใจ', 'เหนื่อย', 
+      'เหม็น', 'ปวดท้อง', 'รุนแรง', 'น่องบวม', 'แดง', 'ร้องไห้', 
+      'ซึมเศร้า', 'ทำร้ายตัวเอง', 'เจ็บหน้าอก'
+    ];
+    
+    let found = false;
+    for (let i = 0; i < keywords.length; i++) {
+      if (text.includes(keywords[i])) {
+        found = true;
+        break;
+      }
+    }
+
+    if (found && text.trim().length > 2) {
+      openModal('keyword-alert-modal');
+      document.getElementById('symptom-input').value = '';
+    }
+  }
+
+  /* ---------------- SURVEY LOGIC ---------------- */
+  async function submitSurvey() {
+    const form = document.getElementById('survey-form');
+    const sv1 = document.querySelector('input[name="sv1"]:checked');
+    const sv2 = document.querySelector('input[name="sv2"]:checked');
+    const sv3 = document.querySelector('input[name="sv3"]:checked');
+    const comment = form.querySelector('textarea').value;
+
+    try {
+      await callAPI('saveSurvey', {
+        username: currentUser,
+        sv1: sv1 ? sv1.value : '',
+        sv2: sv2 ? sv2.value : '',
+        sv3: sv3 ? sv3.value : '',
+        comment: comment || ''
+      });
+    } catch (err) {
+      console.warn('บันทึกแบบประเมินไปที่ Google Sheets ไม่สำเร็จ', err);
+    }
+
+    alert("ขอบคุณสำหรับการประเมินและความคิดเห็นของคุณ! 💖");
+    form.reset();
+    closeModal('survey-modal');
+  }
+
+  /* ---------------- NAVIGATION & SCROLL ---------------- */
+  function switchTab(tabId) {
+    document.querySelectorAll('.pill').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.pill[data-tab="${tabId}"]`).classList.add('active');
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if(el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.style.transition = 'box-shadow 0.4s';
+      el.style.boxShadow = '0 0 0 4px var(--primary-light), 0 4px 20px rgba(0,0,0,0.1)';
+      setTimeout(() => el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.02)', 1500);
+    }
+  }
+
+  /* ---------------- DATA RECORDING LOGIC ---------------- */
+  let activities = [];
+
+  function getFormattedDate() {
+    const d = new Date();
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  // ป้องกัน XSS: แปลงอักขระพิเศษให้ปลอดภัยก่อนแสดงผลด้วย innerHTML
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function updateActivityFeed() {
+    const feed = document.getElementById('activity-feed');
+    if (activities.length === 0) return;
+    feed.innerHTML = activities.map(a => `<div style="padding: 12px; border-bottom: 1px solid #eee;">
+      <div style="font-size: 11px; color: #999;">${escapeHtml(a.date)}</div>
+      <div style="color: var(--text-dark);">${escapeHtml(a.text)}</div>
+    </div>`).join('');
+  }
+
+  async function saveFeeding() {
+    const side = document.getElementById('feed-side').value;
+    const amt = document.getElementById('feed-amount').value;
+    if(!side) return alert('กรุณาเลือกข้างที่ให้นม');
+    const time = getFormattedDate();
+    const detailText = `🍼 ให้นม: ${side} ${amt ? amt+' ออนซ์/มล.' : ''}`;
+
+    try {
+      await callAPI('saveFeeding', {
+        username: currentUser,
+        side, amount: amt || '',
+        detail: detailText
+      });
+      activities.unshift({ date: time, text: detailText });
+      document.getElementById('last-feeding-display').textContent = `${time} (${side})`;
+      document.getElementById('feed-side').value = '';
+      document.getElementById('feed-amount').value = '';
+      updateActivityFeed();
+      alert('บันทึกการให้นมสำเร็จ');
+    } catch (err) {
+      alert('บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    }
+  }
+
+  async function saveBabyData() {
+    const urine = document.getElementById('baby-urine').value;
+    const stool = document.getElementById('baby-stool').value;
+    const sleep = document.getElementById('baby-sleep').value;
+    const weight = document.getElementById('baby-weight').value;
+    if(!urine && !stool && !sleep && !weight) return alert('กรุณากรอกข้อมูลอย่างน้อย 1 ช่อง');
+
+    let textArr = [];
+    if(urine) textArr.push(`ปัสสาวะ ${urine} ครั้ง`);
+    if(stool) textArr.push(`อุจจาระ ${stool} ครั้ง`);
+    if(sleep) textArr.push(`นอน ${sleep} ชม.`);
+    if(weight) textArr.push(`นน. ${weight} กก.`);
+    const detailText = `👶 ข้อมูลลูก: ${textArr.join(', ')}`;
+
+    try {
+      await callAPI('saveBabyData', {
+        username: currentUser,
+        urine: urine || '', stool: stool || '', sleep: sleep || '', weight: weight || '',
+        detail: detailText
+      });
+      activities.unshift({ date: getFormattedDate(), text: detailText });
+      document.getElementById('baby-urine').value = '';
+      document.getElementById('baby-stool').value = '';
+      document.getElementById('baby-sleep').value = '';
+      document.getElementById('baby-weight').value = '';
+      updateActivityFeed();
+      alert('บันทึกข้อมูลลูกสำเร็จ');
+    } catch (err) {
+      alert('บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    }
+  }
+
+  /* ---------------- EPDS CALCULATOR ---------------- */
+  async function calculateEPDS() {
+    const form = document.getElementById('epds-form');
+    if(!form.checkValidity()) { alert('กรุณาตอบคำถามให้ครบทุกข้อ'); return; }
+    let score = 0;
+    const answers = {};
+    for(let i=1; i<=10; i++) {
+      const selected = document.querySelector(`input[name="q${i}"]:checked`);
+      if(selected) {
+        score += parseInt(selected.value);
+        answers['q'+i] = selected.value;
+      }
+    }
+    const resBox = document.getElementById('epds-result');
+    resBox.style.display = 'block';
+
+    let risk = 'ปกติ';
+    if(score >= 13) {
+      risk = 'เสี่ยงสูง';
+      resBox.style.backgroundColor = '#ffebee'; resBox.style.color = '#c62828';
+      resBox.innerHTML = `คะแนนของคุณคือ ${score}/30<br>คุณมีความเสี่ยงสูงที่จะเป็นภาวะซึมเศร้าหลังคลอด โปรดปรึกษาแพทย์ทันที<br><br>📞 <b>สายด่วนสุขภาพจิต:</b> 1323 (ฟรี ตลอด 24 ชม.)<br>📞 <b>เบอร์ฉุกเฉิน:</b> 1669`;
+    } else if (score >= 10) {
+      risk = 'เสี่ยงปานกลาง';
+      resBox.style.backgroundColor = '#fff3e0'; resBox.style.color = '#e65100';
+      resBox.innerHTML = `คะแนนของคุณคือ ${score}/30<br>คุณมีความเสี่ยงปานกลาง ควรพักผ่อนให้เพียงพอและปรึกษาคนใกล้ชิด`;
+    } else {
+      resBox.style.backgroundColor = '#e8f5e9'; resBox.style.color = '#2e7d32';
+      resBox.innerHTML = `คะแนนของคุณคือ ${score}/30<br>สุขภาพจิตของคุณอยู่ในเกณฑ์ปกติ ดูแลตัวเองต่อไปนะคะ!`;
+    }
+
+    try {
+      await callAPI('saveEPDS', { username: currentUser, ...answers, score, risk });
+    } catch (err) {
+      console.warn('บันทึกผล EPDS ไปที่ Google Sheets ไม่สำเร็จ', err);
+    }
+  }
+
+  /* ---------------- TESTING SCORE MODAL LOGIC ---------------- */
+  async function showScoreModal(type) {
+    let score = 0;
+    let total = 5;
+    const answers = {};
+
+    for(let i=1; i<=5; i++) {
+      const ans = document.querySelector(`input[name="${type === 'pre' ? 'pre' : 'post'}_q${i}"]:checked`);
+      answers['q'+i] = ans ? ans.value : '';
+      if(ans && ans.value === 'correct') {
+        score++;
+      }
+    }
+
+    document.getElementById('score-result-text').textContent = `${score} / ${total} คะแนน`;
+    
+    const actionArea = document.getElementById('score-modal-action-btn');
+    if(type === 'pre') {
+      document.getElementById('score-desc').textContent = 'บันทึกคะแนนก่อนเรียนเรียบร้อยแล้ว สามารถศึกษาคลิปวิดีโอด้านล่างต่อได้เลย';
+      actionArea.innerHTML = `<button class="btn btn-primary" style="width:100%;" onclick="closeModal('score-modal'); toggleTestView('post');">ถัดไป: แบบทดสอบหลังเรียน ➔</button>`;
+    } else {
+      document.getElementById('score-desc').textContent = 'ยินดีด้วย! คุณทำแบบทดสอบหลังเรียนเสร็จเรียบร้อยแล้ว';
+      actionArea.innerHTML = `<button class="btn btn-outline" style="width:100%;" onclick="closeModal('score-modal'); toggleTestView('pre');">⬅ กลับไปหน้าแบบทดสอบก่อนเรียน</button>`;
+    }
+
+    openModal('score-modal');
+
+    try {
+      await callAPI(type === 'pre' ? 'savePreTest' : 'savePostTest', {
+        username: currentUser, ...answers, score
+      });
+    } catch (err) {
+      console.warn('บันทึกคะแนนแบบทดสอบไปที่ Google Sheets ไม่สำเร็จ', err);
+    }
+  }
+
+  function toggleTestView(view) {
+    if(view === 'post') {
+      document.getElementById('pre-test-section').style.display = 'none';
+      document.getElementById('post-test-section').style.display = 'block';
+      window.scrollTo(0, 0);
+    } else {
+      document.getElementById('post-test-section').style.display = 'none';
+      document.getElementById('pre-test-section').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+  }
+</script>
+</body>
+</html>
